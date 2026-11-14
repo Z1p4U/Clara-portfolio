@@ -176,7 +176,7 @@ button { font: inherit; }
   align-items: center;
 }
 .hero-copy { position: relative; min-width: 0; padding: 8px 0 2px; isolation: isolate; }
-.orbit-art { position: absolute; z-index: -1; top: -100px; left: -30%; width: 150%; max-width: none; height: auto; opacity: .62; mix-blend-mode: screen; pointer-events: none; }
+.orbit-art { position: absolute; z-index: -1; top: -100px; left: -30%; width: 150%; max-width: none; height: auto; opacity: .34; mix-blend-mode: screen; pointer-events: none; }
 .eyebrow {
   margin: 0;
   font-family: var(--mono);
@@ -445,7 +445,7 @@ button { font: inherit; }
   .hero { display: block; min-height: 0; padding: clamp(40px, 6vw, 64px) 0 36px; }
   .hero-grid { flex: none; grid-template-columns: 1fr; }
   .hero-copy { max-width: 720px; }
-  .orbit-art { top: -70px; left: -22%; width: 138%; opacity: .6; }
+  .orbit-art { top: -70px; left: -22%; width: 138%; opacity: .34; }
   .hero-art { width: min(680px, 100%); margin: -4px auto 0; }
   .neon-carousel-art { --carousel-art-height: clamp(360px, 70vw, 570px); }
   .section-heading { align-items: start; flex-direction: column; gap: 16px; }
@@ -468,7 +468,7 @@ button { font: inherit; }
   .hero { padding: 48px 0 30px; }
   .hero h1 { max-width: 12ch; font-size: clamp(2.8rem, 9vw, 4.25rem); }
   .hero-kicker { flex-wrap: wrap; font-size: 9px; }
-  .orbit-art { top: -65px; left: -25%; width: 142%; opacity: .56; }
+  .orbit-art { top: -65px; left: -25%; width: 142%; opacity: .30; }
   .hero-stats { gap: 8px; margin-top: 35px; }
   .hero-stats span { max-width: 90px; font-size: 9px; }
   .neon-carousel-art { --carousel-art-height: clamp(300px, 87vw, 440px); }
