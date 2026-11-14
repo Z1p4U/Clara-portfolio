@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { BackToTop } from "@/components/back-to-top";
-import { SelectedWork } from "@/components/selected-work";
+import { PortfolioCarousel } from "@/components/portfolio-carousel";
 import { ScrollRevealObserver } from "@/components/scroll-reveal-observer";
 import { NeonCarouselHeroArt } from "@/components/neon-carousel-hero-art";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -79,16 +79,17 @@ export default function Home() {
           <div className="hero-bottom-line" aria-hidden="true"><span /><span /><span /></div>
         </section>
 
+        <div className="scallop" aria-hidden="true" />
         <section className="work-section" id="work" aria-labelledby="work-title">
           <div className="page-wrap">
             <div className="section-heading work-heading" data-reveal="up">
               <div>
                 <p className="eyebrow section-kicker"><span>01</span> Selected work</p>
-                <h2 id="work-title">Product work, <em>with purpose.</em></h2>
+                <h2 id="work-title">Pick a <em>project.</em></h2>
               </div>
-              <p className="section-intro">Interfaces and systems for retail, fitness, social, travel, and hospitality experiences.</p>
+              <p className="section-intro">A few stops across product design: from retail tools and fitness to social experiences and travel platforms.</p>
             </div>
-            <div data-reveal="up"><SelectedWork /></div>
+            <div data-reveal="up"><PortfolioCarousel /></div>
           </div>
         </section>
 
@@ -151,12 +152,13 @@ export default function Home() {
         </section>
 
         <section className="contact-section" id="contact" aria-labelledby="contact-title">
+          <div className="contact-stars" aria-hidden="true"><Spark /><Spark /><Spark /></div>
           <div className="page-wrap contact-wrap">
             <div className="contact-kicker" data-reveal="up"><span className="availability-dot" /> Bangkok, Thailand <span>·</span> Open to a conversation</div>
             <div className="contact-main" data-reveal="up">
               <div>
-                <p className="eyebrow section-kicker"><span>04</span> Contact</p>
-                <h2 id="contact-title">Have a product challenge? <em>Let&apos;s talk.</em></h2>
+                <p className="eyebrow section-kicker"><span>04</span> Ticket booth</p>
+                <h2 id="contact-title">Have a good problem? <em>Let&apos;s talk.</em></h2>
               </div>
               <a className="contact-email" href="mailto:hsweeleehintse@gmail.com">hsweeleehintse@gmail.com <span aria-hidden="true">↗</span></a>
             </div>
