@@ -21,6 +21,7 @@ export function PortfolioCarousel() {
   const pressedPanel = useRef<number | null>(null);
   const suppressClick = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const project = projects[active];
@@ -77,12 +78,19 @@ export function PortfolioCarousel() {
     pressedPanel.current = panel ? Number(panel.dataset.projectIndex) : null;
     const target = panel ?? event.currentTarget;
     target.setPointerCapture(event.pointerId);
+    setDragOffset(0);
     setIsDragging(true);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (pointerStart.current === null) return;
+    setDragOffset(event.clientX - pointerStart.current);
   }
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
     if (pointerStart.current === null) {
       pressedPanel.current = null;
+      setDragOffset(0);
       setIsDragging(false);
       return;
     }
@@ -91,10 +99,12 @@ export function PortfolioCarousel() {
     pointerStart.current = null;
     pressedPanel.current = null;
     setIsDragging(false);
+    setDragOffset(0);
     if (Math.abs(distance) > 42) {
       suppressClick.current = true;
       window.setTimeout(() => { suppressClick.current = false; }, 250);
-      move(distance < 0 ? 1 : -1);
+      const slideCount = Math.min(projects.length - 1, Math.max(1, Math.round(Math.abs(distance) / 210)));
+      move(distance < 0 ? slideCount : -slideCount);
     } else if (tappedPanel !== null) {
       selectProject(tappedPanel);
     }
@@ -142,11 +152,13 @@ export function PortfolioCarousel() {
           role="region"
           aria-label="Selected project carousel"
           tabIndex={0}
+          style={{ "--drag-offset": `${dragOffset}px` } as CSSProperties}
           onKeyDown={handleKeyDown}
           onClickCapture={handleClickCapture}
           onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerCancel={() => { pointerStart.current = null; pressedPanel.current = null; setIsDragging(false); }}
+          onPointerCancel={() => { pointerStart.current = null; pressedPanel.current = null; setDragOffset(0); setIsDragging(false); }}
           onDragStartCapture={(event) => event.preventDefault()}
         >
           <div className="carousel-ring">
