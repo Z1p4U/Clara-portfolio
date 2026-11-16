@@ -93,7 +93,7 @@ button {
   transform: translate3d(36px, 0, 0);
 }
 .reveal-ready [data-reveal="ticket"] {
-  transform: translate3d(0, 58px, 0) scale(0.965);
+  transform: translate3d(0, 0, 0);
   transition:
     opacity 950ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 950ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -623,7 +623,13 @@ button {
   cursor: grabbing;
 }
 .carousel-scene.is-dragging .case-panel {
-  transition: none;
+  transition: opacity 180ms ease;
+}
+.carousel-scene.is-auto-sliding .case-panel {
+  transition:
+    opacity 260ms ease,
+    filter 350ms ease,
+    box-shadow 350ms ease;
 }
 .carousel-scene:focus-visible {
   outline: 2px solid var(--gold-dark);
@@ -679,12 +685,6 @@ button {
 }
 .case-panel--right {
   filter: saturate(0.78) brightness(0.94);
-}
-.case-panel--away-left,
-.case-panel--away-right {
-  transition:
-    transform 1050ms cubic-bezier(0.2, 0.82, 0.2, 1),
-    opacity 0ms;
 }
 .case-panel:hover {
   border-color: #a87127;
@@ -827,6 +827,8 @@ button {
 .project-ticket {
   position: relative;
   display: grid;
+  width: min(830px, 100%);
+  margin-inline: auto;
   grid-template-columns: minmax(0, 1fr) 270px;
   border: 1.5px solid color-mix(in srgb, var(--gold-dark) 45%, var(--line));
   border-radius: 20px;
@@ -835,7 +837,6 @@ button {
     0 22px 56px -35px rgba(58, 34, 48, 0.34),
     0 2px 8px rgba(58, 34, 48, 0.06);
   overflow: hidden;
-  animation: ticket-in 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .project-ticket::before {
   position: absolute;
@@ -846,18 +847,6 @@ button {
   height: 5px;
   content: "";
   background: linear-gradient(90deg, var(--rose), var(--gold), var(--rose));
-}
-@keyframes ticket-in {
-  from {
-    opacity: 0.12;
-    translate: 0 24px;
-    scale: 0.975;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-    scale: 1;
-  }
 }
 .ticket-main {
   min-width: 0;

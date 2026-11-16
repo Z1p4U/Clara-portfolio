@@ -13,12 +13,14 @@ function getOffset(index: number, active: number) {
 
 export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index: number) => void }) {
   const [active, setActive] = useState(0);
-  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
+  const [slideDirection, setSlideDirection] = useState<1 | -1>(-1);
   const [cardSpread, setCardSpread] = useState(300);
+  const [autoProgress, setAutoProgress] = useState(0);
   const [autoplay, setAutoplay] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const pointerStart = useRef<number | null>(null);
+  const pointerProgressStart = useRef(0);
+  const autoProgressRef = useRef(0);
   const pressedPanel = useRef<number | null>(null);
   const suppressClick = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -26,7 +28,10 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
   const carouselRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const dragStep = Math.max(170, cardSpread * 0.72);
-  const dragProgress = dragOffset / dragStep;
+  const isAutoSliding = autoplay && !isFocused && !isDragging && inView;
+  const dragProgress = isDragging
+    ? pointerProgressStart.current + dragOffset / dragStep
+    : autoProgress;
 
   useEffect(() => {
     onActiveChange?.(active);
@@ -59,22 +64,48 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
   }, []);
 
   useEffect(() => {
-    if (!autoplay || isHovered || isFocused || isDragging || !inView) return;
-    const timer = window.setInterval(() => {
-      setSlideDirection(1);
-      setActive((current) => (current + 1) % projects.length);
-    }, 6200);
-    return () => window.clearInterval(timer);
-  }, [autoplay, isHovered, isFocused, isDragging, inView]);
+    if (!isAutoSliding) return;
+    let frame = 0;
+    let previousTime: number | null = null;
+    const slideDuration = 6200;
+
+    const advance = (time: number) => {
+      if (previousTime === null) previousTime = time;
+      const elapsed = Math.min(time - previousTime, 80);
+      previousTime = time;
+
+      let nextProgress = autoProgressRef.current + elapsed / slideDuration;
+      if (nextProgress >= 1) {
+        const slides = Math.floor(nextProgress);
+        nextProgress -= slides;
+        setSlideDirection(-1);
+        setActive((current) => (current - slides + projects.length) % projects.length);
+      }
+
+      autoProgressRef.current = nextProgress;
+      setAutoProgress(nextProgress);
+      frame = window.requestAnimationFrame(advance);
+    };
+
+    frame = window.requestAnimationFrame(advance);
+    return () => window.cancelAnimationFrame(frame);
+  }, [isAutoSliding]);
+
+  function resetAutoProgress() {
+    autoProgressRef.current = 0;
+    setAutoProgress(0);
+  }
 
   function selectProject(index: number) {
     const forwardDistance = (index - active + projects.length) % projects.length;
     if (forwardDistance === 0) return;
+    resetAutoProgress();
     setSlideDirection(forwardDistance <= projects.length / 2 ? 1 : -1);
     setActive(index);
   }
 
   function move(amount: number) {
+    resetAutoProgress();
     setSlideDirection(amount < 0 ? -1 : 1);
     setActive((current) => (current + amount + projects.length) % projects.length);
   }
@@ -95,6 +126,7 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
     pointerStart.current = event.clientX;
     const panel = event.target instanceof HTMLElement ? event.target.closest<HTMLButtonElement>(".case-panel") : null;
     pressedPanel.current = panel ? Number(panel.dataset.projectIndex) : null;
+    pointerProgressStart.current = autoProgressRef.current;
     const target = panel ?? event.currentTarget;
     target.setPointerCapture(event.pointerId);
     setDragOffset(0);
@@ -115,6 +147,7 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
     }
     const distance = event.clientX - pointerStart.current;
     const tappedPanel = pressedPanel.current;
+    const totalProgress = pointerProgressStart.current + distance / dragStep;
     pointerStart.current = null;
     pressedPanel.current = null;
     setIsDragging(false);
@@ -122,8 +155,8 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
     if (Math.abs(distance) > 42) {
       suppressClick.current = true;
       window.setTimeout(() => { suppressClick.current = false; }, 250);
-      const slideCount = Math.min(projects.length - 1, Math.max(1, Math.round(Math.abs(distance) / dragStep)));
-      move(distance < 0 ? slideCount : -slideCount);
+      const slideCount = Math.min(projects.length - 1, Math.max(1, Math.round(Math.abs(totalProgress))));
+      move(totalProgress < 0 ? slideCount : totalProgress > 0 ? -slideCount : distance < 0 ? slideCount : -slideCount);
     } else if (tappedPanel !== null) {
       selectProject(tappedPanel);
     }
@@ -140,8 +173,6 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
     <div
       className="carousel-wrap"
       ref={carouselRef}
-      onPointerEnter={() => setIsHovered(true)}
-      onPointerLeave={() => setIsHovered(false)}
       onFocusCapture={() => setIsFocused(true)}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -167,7 +198,9 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
       <div className="carousel-stage">
         <span className="carousel-pole" aria-hidden="true" />
         <div
-          className={`carousel-scene${isDragging ? " is-dragging" : ""}`}
+          className={`carousel-scene${isDragging ? " is-dragging" : ""}${
+            isAutoSliding ? " is-auto-sliding" : ""
+          }`}
           role="region"
           aria-label="Selected project carousel"
           tabIndex={0}
@@ -184,10 +217,16 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
             {projects.map((item, index) => {
               const offset = getOffset(index, active);
               const orbitOffset = offset + dragProgress;
-              const angle = orbitOffset * (Math.PI / 3);
+              const angle = orbitOffset * ((Math.PI * 2) / projects.length);
               const facing = Math.cos(angle);
-              const opacity = Math.max(0, Math.min(1, (facing + 0.4) / 1.4));
               const nearestSlot = Math.round(orbitOffset);
+              const movementDirection = isAutoSliding
+                ? -1
+                : isDragging && dragOffset !== 0
+                  ? dragOffset < 0 ? 1 : -1
+                  : slideDirection;
+              const isFrontSlot = offset === 0 || offset === movementDirection;
+              const opacity = isFrontSlot ? 1 : 0.1;
               const position = nearestSlot === 0
                 ? "front"
                 : nearestSlot === -1
@@ -195,12 +234,12 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
                   : nearestSlot === 1
                     ? "right"
                     : slideDirection > 0 ? "away-right" : "away-left";
-              const isAway = opacity < 0.08;
-              const panelX = Math.sin(angle) * cardSpread;
+              const isAway = !isFrontSlot;
+              const panelX = Math.sin(angle) * cardSpread * 0.86;
               const panelY = Math.sin(angle) * 12;
-              const panelZ = facing * 110;
-              const panelYaw = -angle * 0.72;
-              const panelScale = 0.68 + Math.max(0, facing) * 0.32;
+              const panelZ = 55 + facing * 55;
+              const panelYaw = -Math.sin(angle) * (Math.PI / 4);
+              const panelScale = 0.8 + Math.max(0, facing) * 0.2;
               const cardStyle = {
                 "--case-color": item.color,
                 transform: `translateX(calc(-50% + ${panelX}px)) translateY(${panelY}px) translateZ(${panelZ}px) rotateY(${panelYaw}rad) scale(${panelScale})`,
