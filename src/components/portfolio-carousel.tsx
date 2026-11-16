@@ -14,6 +14,7 @@ function getOffset(index: number, active: number) {
 export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index: number) => void }) {
   const [active, setActive] = useState(0);
   const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
+  const [cardSpread, setCardSpread] = useState(300);
   const [autoplay, setAutoplay] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -24,10 +25,25 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
   const [dragOffset, setDragOffset] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+  const dragStep = Math.max(170, cardSpread * 0.72);
+  const dragProgress = dragOffset / dragStep;
 
   useEffect(() => {
     onActiveChange?.(active);
   }, [active, onActiveChange]);
+
+  useEffect(() => {
+    const updateCardSpread = () => {
+      const viewportWidth = window.innerWidth;
+      const spread = viewportWidth <= 700
+        ? Math.min(225, Math.max(145, viewportWidth * 0.32))
+        : Math.min(310, Math.max(270, viewportWidth * 0.24));
+      setCardSpread(spread);
+    };
+    updateCardSpread();
+    window.addEventListener("resize", updateCardSpread);
+    return () => window.removeEventListener("resize", updateCardSpread);
+  }, []);
 
   useEffect(() => {
     const prefersLessMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -106,7 +122,7 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
     if (Math.abs(distance) > 42) {
       suppressClick.current = true;
       window.setTimeout(() => { suppressClick.current = false; }, 250);
-      const slideCount = Math.min(projects.length - 1, Math.max(1, Math.round(Math.abs(distance) / 210)));
+      const slideCount = Math.min(projects.length - 1, Math.max(1, Math.round(Math.abs(distance) / dragStep)));
       move(distance < 0 ? slideCount : -slideCount);
     } else if (tappedPanel !== null) {
       selectProject(tappedPanel);
@@ -155,7 +171,7 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
           role="region"
           aria-label="Selected project carousel"
           tabIndex={0}
-          style={{ "--drag-offset": `${dragOffset}px` } as CSSProperties}
+          style={{ "--card-spread": `${cardSpread}px` } as CSSProperties}
           onKeyDown={handleKeyDown}
           onClickCapture={handleClickCapture}
           onPointerDown={handlePointerDown}
@@ -167,15 +183,31 @@ export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index:
           <div className="carousel-ring">
             {projects.map((item, index) => {
               const offset = getOffset(index, active);
-              const position = offset === 0
+              const orbitOffset = offset + dragProgress;
+              const angle = orbitOffset * (Math.PI / 3);
+              const facing = Math.cos(angle);
+              const opacity = Math.max(0, Math.min(1, (facing + 0.4) / 1.4));
+              const nearestSlot = Math.round(orbitOffset);
+              const position = nearestSlot === 0
                 ? "front"
-                : offset === -1
+                : nearestSlot === -1
                   ? "left"
-                  : offset === 1
+                  : nearestSlot === 1
                     ? "right"
                     : slideDirection > 0 ? "away-right" : "away-left";
-              const isAway = position.startsWith("away");
-              const cardStyle = { "--case-color": item.color } as CSSProperties;
+              const isAway = opacity < 0.08;
+              const panelX = Math.sin(angle) * cardSpread;
+              const panelY = Math.sin(angle) * 12;
+              const panelZ = facing * 110;
+              const panelYaw = -angle * 0.72;
+              const panelScale = 0.68 + Math.max(0, facing) * 0.32;
+              const cardStyle = {
+                "--case-color": item.color,
+                transform: `translateX(calc(-50% + ${panelX}px)) translateY(${panelY}px) translateZ(${panelZ}px) rotateY(${panelYaw}rad) scale(${panelScale})`,
+                opacity,
+                zIndex: Math.round(50 + facing * 50),
+                pointerEvents: isAway ? "none" : "auto",
+              } as CSSProperties;
               return (
                 <button
                   className={`case-panel case-panel--${position}`}
