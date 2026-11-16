@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import * as THREE from "three";
 
@@ -360,14 +360,6 @@ function CarouselModel({
   );
 }
 
-function TransparentScene() {
-  const { gl } = useThree();
-  useEffect(() => {
-    gl.setClearColor(0x000000, 0);
-  }, [gl]);
-  return null;
-}
-
 export type NeonCarousel3DProps = {
   /** CSS class for the wrapping element. */
   className?: string;
@@ -471,12 +463,12 @@ export default function NeonCarousel3D({
       style={{ width: "100%", height, background: "transparent", touchAction: "pan-y" }}
     >
       <Canvas
+        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
         dpr={[1, 1.75]}
         camera={{ position: [6.1, 3.3, 9.5], fov: 38, near: 0.1, far: 60 }}
         gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         style={{ width: "100%", height: "100%", background: "transparent" }}
       >
-        <TransparentScene />
         <ambientLight intensity={0.85} />
         <directionalLight position={[3, 8, 6]} intensity={2.3} color="#ffe0a9" />
         <directionalLight position={[-7, 2, -3]} intensity={1.1} color="#993bff" />
