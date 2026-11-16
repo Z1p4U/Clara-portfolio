@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { BackToTop } from "@/components/back-to-top";
-import { PortfolioCarousel } from "@/components/portfolio-carousel";
+import { PortfolioWorkStage } from "@/components/portfolio-work-stage";
 import { ScrollRevealObserver } from "@/components/scroll-reveal-observer";
 import { NeonCarouselHeroArt } from "@/components/neon-carousel-hero-art";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -54,50 +54,37 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="hero" id="home" aria-labelledby="hero-title">
-          <div className="hero-stars" aria-hidden="true" />
-          <div className="page-wrap hero-grid">
-            <div className="hero-copy" data-reveal="left">
-              <Image className="orbit-art" src="/images/golden-star-orbit-arc.png" alt="" width={1484} height={1060} priority aria-hidden="true" />
-              <p className="eyebrow hero-kicker"><span className="availability-dot" /> UI/UX &amp; product designer <span>· Bangkok, Thailand</span></p>
-              <h1 id="hero-title">I make complex digital products feel <em>clear.</em></h1>
-              <p className="hero-lead">Thoughtful, production-ready experiences across retail, fitness, social, SaaS, travel, and hospitality.</p>
-              <div className="hero-actions">
-                <a className="button button-outline" href="#work">Explore my work <span aria-hidden="true">↗</span></a>
-                <a className="cv-link" href="/cv.pdf" download>Download CV <span aria-hidden="true">↓</span></a>
+        <PortfolioWorkStage>
+          <section className="hero" id="home" aria-labelledby="hero-title">
+            <div className="hero-stars" aria-hidden="true" />
+            <div className="page-wrap hero-grid">
+              <div className="hero-copy" data-reveal="left">
+                <Image className="orbit-art" src="/images/golden-star-orbit-arc.png" alt="" width={1484} height={1060} priority aria-hidden="true" />
+                <p className="eyebrow hero-kicker"><span className="availability-dot" /> UI/UX &amp; product designer <span>· Bangkok, Thailand</span></p>
+                <h1 id="hero-title">I make complex digital products feel <em>clear.</em></h1>
+                <p className="hero-lead">Thoughtful, production-ready experiences across retail, fitness, social, SaaS, travel, and hospitality.</p>
+                <div className="hero-actions">
+                  <a className="button button-outline" href="#work">Explore my work <span aria-hidden="true">↗</span></a>
+                  <a className="cv-link" href="/cv.pdf" download>Download CV <span aria-hidden="true">↓</span></a>
+                </div>
+                <div className="hero-stats" aria-label="Experience highlights">
+                  <div><strong>4+</strong><span>years in product design</span></div>
+                  <div><strong>80+</strong><span>production screens</span></div>
+                  <div><strong>120+</strong><span>design components</span></div>
+                </div>
               </div>
-              <div className="hero-stats" aria-label="Experience highlights">
-                <div><strong>4+</strong><span>years in product design</span></div>
-                <div><strong>80+</strong><span>production screens</span></div>
-                <div><strong>120+</strong><span>design components</span></div>
+              <div className="hero-art" data-reveal="right">
+                <NeonCarouselHeroArt />
               </div>
             </div>
-            <div className="hero-art" data-reveal="right">
-              <NeonCarouselHeroArt />
-            </div>
-          </div>
-          <div className="hero-bottom-line" aria-hidden="true"><span /><span /><span /></div>
-        </section>
-
-        <div className="scallop" aria-hidden="true" />
-        <section className="work-section" id="work" aria-labelledby="work-title">
-          <div className="page-wrap">
-            <div className="section-heading work-heading" data-reveal="up">
-              <div>
-                <p className="eyebrow section-kicker"><span>01</span> Selected work</p>
-                <h2 id="work-title">Pick a <em>project.</em></h2>
-              </div>
-              <p className="section-intro">A few stops across product design: from retail tools and fitness to social experiences and travel platforms.</p>
-            </div>
-            <div data-reveal="up"><PortfolioCarousel /></div>
-          </div>
-        </section>
+            <div className="hero-bottom-line" aria-hidden="true"><span /><span /><span /></div>
+          </section>
+        </PortfolioWorkStage>
 
         <section className="process-section section-space" id="process" aria-labelledby="process-title">
           <div className="page-wrap">
             <div className="section-heading process-heading" data-reveal="up">
               <div>
-                <p className="eyebrow section-kicker"><span>02</span> The process</p>
                 <h2 id="process-title">From first question to <em>launch.</em></h2>
               </div>
               <p className="section-intro">A clear path keeps the work grounded in people, product goals, and what the team can build.</p>
@@ -118,7 +105,6 @@ export default function Home() {
           <div className="page-wrap">
             <div className="about-grid">
               <div className="about-intro" data-reveal="left">
-                <p className="eyebrow section-kicker"><span>03</span> About</p>
                 <h2 id="about-title">Good experiences begin with <em>understanding.</em></h2>
                 <div className="about-prose">
                   <p>I&apos;m Hswele Ehin Tse, a UI/UX and product designer based in Bangkok. I design digital products for teams working across retail, fitness, social, travel, and hospitality.</p>
@@ -157,7 +143,6 @@ export default function Home() {
             <div className="contact-kicker" data-reveal="up"><span className="availability-dot" /> Bangkok, Thailand <span>·</span> Open to a conversation</div>
             <div className="contact-main" data-reveal="up">
               <div>
-                <p className="eyebrow section-kicker"><span>04</span> Ticket booth</p>
                 <h2 id="contact-title">Have a good problem? <em>Let&apos;s talk.</em></h2>
               </div>
               <a className="contact-email" href="mailto:hsweeleehintse@gmail.com">hsweeleehintse@gmail.com <span aria-hidden="true">↗</span></a>

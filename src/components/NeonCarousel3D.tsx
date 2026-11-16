@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import * as THREE from "three";
 
@@ -15,6 +15,42 @@ const LIGHT = "#ffe6a4";
 const PURPLE = "#3f145f";
 const ROOF = "#501976";
 const DARK_PURPLE = "#2b0d4d";
+
+const clockWarningFilterState = globalThis as typeof globalThis & {
+  __hsweleThreeClockWarningFilterInstalled?: boolean;
+};
+
+// React Three Fiber 9 creates THREE.Clock internally. Filter only its known
+// deprecation notice while allowing every other Three.js message through.
+if (!clockWarningFilterState.__hsweleThreeClockWarningFilterInstalled) {
+  const previousConsoleHandler = THREE.getConsoleFunction();
+
+  THREE.setConsoleFunction((type, message, ...params) => {
+    if (type === "warn" && message === "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.") {
+      return;
+    }
+
+    if (previousConsoleHandler) {
+      previousConsoleHandler(type, message, ...params);
+      return;
+    }
+
+    if (type === "warn") {
+      const stackTrace = params[0] as { isStackTrace?: boolean; getError?: (message: string) => Error } | undefined;
+      if (stackTrace?.isStackTrace && stackTrace.getError) {
+        console.warn(stackTrace.getError(message));
+      } else {
+        console.warn(message, ...params);
+      }
+    } else if (type === "error") {
+      console.error(message, ...params);
+    } else {
+      console.log(message, ...params);
+    }
+  });
+
+  clockWarningFilterState.__hsweleThreeClockWarningFilterInstalled = true;
+}
 
 const TWO_PI = Math.PI * 2;
 const CHAIR_COUNT = 12;
@@ -360,6 +396,14 @@ function CarouselModel({
   );
 }
 
+function TransparentScene() {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.setClearColor(0x000000, 0);
+  }, [gl]);
+  return null;
+}
+
 export type NeonCarousel3DProps = {
   /** CSS class for the wrapping element. */
   className?: string;
@@ -463,12 +507,12 @@ export default function NeonCarousel3D({
       style={{ width: "100%", height, background: "transparent", touchAction: "pan-y" }}
     >
       <Canvas
-        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
-        dpr={[1, 1.75]}
+        dpr={[1, 1.35]}
         camera={{ position: [6.1, 3.3, 9.5], fov: 38, near: 0.1, far: 60 }}
         gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         style={{ width: "100%", height: "100%", background: "transparent" }}
       >
+        <TransparentScene />
         <ambientLight intensity={0.85} />
         <directionalLight position={[3, 8, 6]} intensity={2.3} color="#ffe0a9" />
         <directionalLight position={[-7, 2, -3]} intensity={1.1} color="#993bff" />

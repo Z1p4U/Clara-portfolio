@@ -11,7 +11,7 @@ function getOffset(index: number, active: number) {
   return offset;
 }
 
-export function PortfolioCarousel() {
+export function PortfolioCarousel({ onActiveChange }: { onActiveChange?: (index: number) => void }) {
   const [active, setActive] = useState(0);
   const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
   const [autoplay, setAutoplay] = useState(false);
@@ -24,7 +24,10 @@ export function PortfolioCarousel() {
   const [dragOffset, setDragOffset] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
-  const project = projects[active];
+
+  useEffect(() => {
+    onActiveChange?.(active);
+  }, [active, onActiveChange]);
 
   useEffect(() => {
     const prefersLessMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -230,26 +233,34 @@ export function PortfolioCarousel() {
       <p className="eyebrow ticket-label" aria-live="polite">
         Case study {String(active + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
       </p>
-      <article className="project-ticket" data-reveal="ticket" aria-live="polite" key={project.name}>
-        <div className="ticket-main">
-          <p className="ticket-meta">{project.category}</p>
-          <h3>{project.name}</h3>
-          <p className="ticket-summary">{project.summary}</p>
-          <ul className="ticket-highlights">
-            {project.highlights.map((highlight) => <li key={highlight}><strong>{highlight}</strong></li>)}
-          </ul>
-          <a className="ticket-link" href="#contact">Ask about this project <span aria-hidden="true">↗</span></a>
-        </div>
-        <aside className="ticket-stub" aria-label={`${project.name} project details`}>
-          <div className="admit-row"><span>Admit one</span><span>No. {String(active + 1).padStart(3, "0")}</span></div>
-          <dl>
-            <div><dt>Role</dt><dd>UI/UX Designer</dd></div>
-            <div><dt>Focus</dt><dd>{project.focus}</dd></div>
-            <div><dt>Tools and methods</dt><dd><ul className="tool-chips">{project.tools.map((tool) => <li key={tool}>{tool}</li>)}</ul></dd></div>
-          </dl>
-          <div className="ticket-barcode" aria-hidden="true" />
-        </aside>
-      </article>
     </div>
+  );
+}
+
+export function PortfolioProjectTicket({ projectIndex }: { projectIndex: number }) {
+  const active = Math.min(projects.length - 1, Math.max(0, projectIndex));
+  const project = projects[active];
+
+  return (
+    <article className="project-ticket" data-reveal="ticket" aria-live="polite" key={project.name}>
+      <div className="ticket-main">
+        <p className="ticket-meta">{project.category}</p>
+        <h3>{project.name}</h3>
+        <p className="ticket-summary">{project.summary}</p>
+        <ul className="ticket-highlights">
+          {project.highlights.map((highlight) => <li key={highlight}><strong>{highlight}</strong></li>)}
+        </ul>
+        <a className="ticket-link" href="#contact">Ask about this project <span aria-hidden="true">↗</span></a>
+      </div>
+      <aside className="ticket-stub" aria-label={`${project.name} project details`}>
+        <div className="admit-row"><span>Admit one</span><span>No. {String(active + 1).padStart(3, "0")}</span></div>
+        <dl>
+          <div><dt>Role</dt><dd>UI/UX Designer</dd></div>
+          <div><dt>Focus</dt><dd>{project.focus}</dd></div>
+          <div><dt>Tools and methods</dt><dd><ul className="tool-chips">{project.tools.map((tool) => <li key={tool}>{tool}</li>)}</ul></dd></div>
+        </dl>
+        <div className="ticket-barcode" aria-hidden="true" />
+      </aside>
+    </article>
   );
 }
